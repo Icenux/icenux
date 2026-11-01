@@ -1,7 +1,7 @@
 # Icenux
 
 Společný APT a RPM repozitář mých aplikací. Běží na GitHub Pages bez vlastního serveru.
-Aplikace v něm zatím: [repo-doctor](https://github.com/Luquas95/repo-doctor), [ccc](https://github.com/Luquas95/ccc).
+Aplikace v něm zatím: [repo-doctor](https://github.com/Luquas95/repo-doctor), [ccc](https://github.com/Luquas95/ccc_TUI).
 
 ## Jak se používá
 
@@ -35,7 +35,7 @@ V repozitáři je vždy jen **nejnovější verze** každé aplikace.
 
 1. Vydání aplikace obsahuje `*.deb` a/nebo `*.rpm`, `SHA256SUMS` a `SHA256SUMS.asc` (podpis klíčem aplikace).
 2. Veřejný klíč aplikace do `keys/<aplikace>.asc` a jeho otisk do `keys/<aplikace>.fingerprint`.
-3. Řádek `vlastník/repozitář` do `apps.txt`, commit do `main`.
+3. Řádek `vlastník/repozitář` do `apps.txt` (a za mezeru jméno balíčku, když se liší od jména repozitáře, např. `Luquas95/ccc_TUI ccc`), commit do `main`.
 
 GitHub vypne plánované workflow po 60 dnech bez aktivity v repozitáři. Pokud by hodinový běh
 přestal, stačí ho znovu zapnout v záložce Actions, nebo spustit ručně.
