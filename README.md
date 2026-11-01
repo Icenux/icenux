@@ -25,15 +25,17 @@ sudo apt update
 - `.github/workflows/publish.yml` – spouští build při změně v `main`, každou hodinu a ručně
   a výsledek nasadí na Pages. Při chybě (neplatný podpis, chybějící balíček) se nic nenasadí
   a stávající repozitář zůstane beze změny.
-- Podpisový klíč: soukromý je v secretu `RELEASE_SIGNING_KEY`, veřejný v `keys/icenux.asc`
-  (otisk `keys/fingerprint`). Vydání aplikace musí mít `SHA256SUMS` podepsaný týmž klíčem.
+- Klíč Icenux podepisuje metadata repozitáře: soukromý je v secretu `RELEASE_SIGNING_KEY`, veřejný
+  v `keys/icenux.asc` (otisk `keys/fingerprint`). Vydání aplikace musí mít `SHA256SUMS` podepsaný
+  klíčem aplikace (`keys/<aplikace>.asc` a `keys/<aplikace>.fingerprint`).
 
 V repozitáři je vždy jen **nejnovější verze** každé aplikace.
 
 ## Přidání aplikace
 
-1. Vydání aplikace obsahuje `*.deb` a/nebo `*.rpm`, `SHA256SUMS` a `SHA256SUMS.asc` (podpis klíčem Icenux).
-2. Řádek `vlastník/repozitář` do `apps.txt`, commit do `main`.
+1. Vydání aplikace obsahuje `*.deb` a/nebo `*.rpm`, `SHA256SUMS` a `SHA256SUMS.asc` (podpis klíčem aplikace).
+2. Veřejný klíč aplikace do `keys/<aplikace>.asc` a jeho otisk do `keys/<aplikace>.fingerprint`.
+3. Řádek `vlastník/repozitář` do `apps.txt`, commit do `main`.
 
 GitHub vypne plánované workflow po 60 dnech bez aktivity v repozitáři. Pokud by hodinový běh
 přestal, stačí ho znovu zapnout v záložce Actions, nebo spustit ručně.

@@ -5,8 +5,9 @@
 #   rpm/  – repodata/ z createrepo_c + podepsaný repomd.xml.asc, <aplikace>/*.rpm
 #   icenux.asc – veřejný klíč repozitáře
 #
-# Balíček se vezme jen tehdy, když sedí jeho SHA-256 v SHA256SUMS a ten je podepsaný
-# klíčem z keys/icenux.asc (otisk keys/fingerprint). Cokoli jiného build zastaví a
+# Klíče: metadata repozitáře podepisuje klíč Icenux (keys/icenux.asc, otisk keys/fingerprint;
+# soukromý je v GNUPGHOME). Balíček se vezme jen tehdy, když sedí jeho SHA-256 v SHA256SUMS
+# a ten je podepsaný klíčem té aplikace (keys/<aplikace>.asc, otisk keys/<aplikace>.fingerprint). Cokoli jiného build zastaví a
 # stávající web zůstane beze změny. Podepsaný SHA256SUMS je seznam povolených souborů a balíček
 # musí nést jméno aplikace a verzi odpovídající značce vydání.
 #
@@ -23,8 +24,6 @@ trap 'rm -rf "$work"' EXIT
 
 die() { echo "build-site: $*" >&2; exit 1; }
 
-# Veřejný klíč pro ověřování podpisů vydání (samostatná klíčenka, nepoužívá soukromý klíč).
-gpg --dearmor < keys/icenux.asc > "$work/pub.gpg"
 
 rm -rf "$site" && mkdir -p "$site/apt" "$site/rpm"
 cp keys/icenux.asc "$site/icenux.asc"
@@ -45,13 +44,17 @@ for app in "${apps[@]}"; do
     tag=$(gh release view -R "$app" --json tagName --jq .tagName)
     [[ $tag =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]] || die "$app: nepovolená značka vydání '$tag'"
     ver=${tag#v}
+    [ -f "keys/$name.asc" ] && [ -f "keys/$name.fingerprint" ] || die "$app: chybí keys/$name.asc nebo keys/$name.fingerprint"
+    appfpr=$(tr -d '[:space:]' < "keys/$name.fingerprint")
+    # klíč aplikace do samostatné klíčenky pro gpgv (soukromý klíč se nepoužije)
+    gpg --dearmor < "keys/$name.asc" > "$work/$name.gpg"
 
     # 1) jen podepsaný seznam; teprve po ověření podpisu se stahují balíčky
     gh release download -R "$app" "$tag" -D "$dir" --pattern SHA256SUMS --pattern SHA256SUMS.asc
-    status=$(gpgv --keyring "$work/pub.gpg" --status-fd 1 "$dir/SHA256SUMS.asc" "$dir/SHA256SUMS" 2>/dev/null) \
+    status=$(gpgv --keyring "$work/$name.gpg" --status-fd 1 "$dir/SHA256SUMS.asc" "$dir/SHA256SUMS" 2>/dev/null) \
         || die "$app $tag: neplatný podpis SHA256SUMS"
-    grep -q "^\[GNUPG:\] VALIDSIG $fpr " <<< "$status" \
-        || die "$app $tag: SHA256SUMS není podepsaný klíčem $fpr"
+    grep -q "^\[GNUPG:\] VALIDSIG $appfpr " <<< "$status" \
+        || die "$app $tag: SHA256SUMS není podepsaný klíčem $appfpr"
 
     # 2) podepsaný seznam je seznam povolených souborů: stahují se přesně jeho .deb/.rpm
     debs=(); rpms=()
