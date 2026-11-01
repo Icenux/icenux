@@ -1,7 +1,7 @@
 # Icenux
 
 Společný APT a RPM repozitář mých aplikací. Běží na GitHub Pages bez vlastního serveru.
-Aplikace v něm zatím: [repo-doctor](https://github.com/Luquas95/repo-doctor).
+Aplikace v něm zatím: [repo-doctor](https://github.com/Luquas95/repo-doctor), [ccc](https://github.com/Luquas95/ccc).
 
 ## Jak se používá
 

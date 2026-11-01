@@ -1,3 +1,4 @@
 # Aplikace v repozitáři Icenux: vlastník/repozitář na GitHubu (jedna na řádek).
 # Z nejnovějšího vydání každé se vezmou .deb a .rpm; musí mít podepsaný SHA256SUMS.
 Luquas95/repo-doctor
+Luquas95/ccc
