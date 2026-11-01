@@ -30,7 +30,7 @@ jobs:
       - name: nástroje
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq apt-utils createrepo-c
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq apt-utils createrepo-c rpm
       - name: APT a RPM repozitář
         env:
           GH_TOKEN: ${{ github.token }}
