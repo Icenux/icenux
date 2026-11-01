@@ -28,16 +28,18 @@ die() { echo "build-site: $*" >&2; exit 1; }
 rm -rf "$site" && mkdir -p "$site/apt" "$site/rpm"
 cp keys/icenux.asc "$site/icenux.asc"
 
-apps=()
-while read -r app _; do
+apps=(); pkgs=()
+while read -r app pkg _; do
     case "$app" in ''|'#'*) continue ;; esac
     apps+=("$app")
+    pkgs+=("${pkg:-${app##*/}}")   # jméno balíčku (a klíčů): druhý sloupec, jinak jméno repozitáře
 done < apps.txt
 [ "${#apps[@]}" -gt 0 ] || die "apps.txt je prázdný"
 
 summary=()
-for app in "${apps[@]}"; do
-    name=${app##*/}
+for i in "${!apps[@]}"; do
+    app=${apps[$i]}
+    name=${pkgs[$i]}
     dir=$work/$name
     mkdir -p "$dir"
     [[ $name =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]] || die "$app: nepovolené jméno aplikace"
