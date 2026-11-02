@@ -1,5 +1,5 @@
 # Aplikace v repozitáři Icenux: vlastník/repozitář na GitHubu (jedna na řádek), volitelně za mezerou
 # jméno balíčku (a klíčů keys/<jméno>.asc), když se liší od jména repozitáře.
 # Z nejnovějšího vydání každé se vezmou .deb a .rpm; musí mít podepsaný SHA256SUMS.
-Luquas95/repo-doctor
-Luquas95/ccc_TUI ccc
+Icenux/repo-doctor
+Icenux/ccc_TUI ccc

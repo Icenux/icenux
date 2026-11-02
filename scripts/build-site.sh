@@ -118,7 +118,7 @@ createrepo_c --quiet "$site/rpm"
 
 {
     echo '<!doctype html><meta charset="utf-8"><title>Icenux – balíčkové repozitáře</title>'
-    echo '<p>APT a RPM repozitář <a href="https://github.com/Luquas95/icenux">Icenux</a>. Aplikace:</p><ul>'
+    echo '<p>APT a RPM repozitář <a href="https://github.com/Icenux/icenux">Icenux</a>. Aplikace:</p><ul>'
     for item in "${summary[@]}"; do echo "<li>${item}</li>"; done
     echo '</ul>'
 } > "$site/index.html"
