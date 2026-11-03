@@ -16,6 +16,27 @@ echo 'deb [signed-by=/usr/share/keyrings/icenux.asc] https://icenux.github.io/ic
 sudo apt update
 ```
 
+## Ověření klíčů
+
+Před přidáním zdroje si zkontroluj otisk klíče repozitáře. Stejný je na webu aplikací
+(<https://icenux.github.io/apps/ccc/>) a v souboru `keys/fingerprint`, takže ho máš ze dvou nezávislých míst:
+
+```
+DED1 2904 B5BA E37D 0661  C626 A72C 50E3 F90C D644
+```
+
+```sh
+gpg --show-keys --fingerprint /usr/share/keyrings/icenux.asc
+```
+
+Vydání jednotlivých aplikací podepisují vlastní klíče (`keys/<aplikace>.asc`); `SHA256SUMS.asc` v každém vydání
+ověříš takto: `gpg --import keys/<aplikace>.asc && gpg --verify SHA256SUMS.asc SHA256SUMS`.
+
+| Aplikace | Otisk podpisového klíče |
+| --- | --- |
+| ccc | `D5AE 3DC0 F062 9B5B 97E8  1C45 6A16 DF02 11F8 C1A5` |
+| repo-doctor | `61CB 5447 85F6 CE13 3581  65CD DC0A DD39 ACA4 DB9A` |
+
 ## Jak to funguje
 
 - `apps.txt` – seznam aplikací (`vlastník/repozitář` na GitHubu).
