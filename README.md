@@ -22,20 +22,24 @@ sudo apt update
 Then install an app with `sudo apt install <package>` (`repo-doctor`, `ccc`, `livem`, `displays`, `scrv`,
 `sway-desktop-stats`, `sgc-screensaver`).
 
-Arch Linux (pacman repository):
+Arch Linux (pacman repository, signed):
 
 ```sh
+sudo curl -fsSLo /tmp/icenux.asc https://icenux.github.io/icenux/icenux.asc
+gpg --show-keys --fingerprint /tmp/icenux.asc   # must be DED1 2904 B5BA E37D 0661 C626 A72C 50E3 F90C D644
+sudo pacman-key --add /tmp/icenux.asc
+sudo pacman-key --lsign-key DED12904B5BAE37D0661C626A72C50E3F90CD644
 sudo tee -a /etc/pacman.conf <<'EOF'
 [icenux]
-SigLevel = Optional TrustAll
+SigLevel = Required
 Server = https://icenux.github.io/icenux/arch/$arch
 EOF
 sudo pacman -Sy livem
 ```
 
-The pacman repository is **not signed** (`Optional TrustAll` accepts it without a key). A package still gets in only
-through the signed `SHA256SUMS` of its release (see below), and the transport is HTTPS. Arch packages exist for
-repo-doctor, livem, displays, scrv, sway-desktop-stats and sgc-screensaver (not for ccc yet).
+The fingerprint is also in "Verifying the keys" below. Every package and the database are signed with the Icenux key; a
+package still gets in only through the signed `SHA256SUMS` of its release (see below).
+Arch packages exist for repo-doctor, livem, displays, scrv, sway-desktop-stats and sgc-screensaver (not for ccc yet).
 
 ## Verifying the keys
 
@@ -68,7 +72,7 @@ of a release like this: `gpg --import keys/<app>.asc && gpg --verify SHA256SUMS.
 - `apps.txt` – the list of apps (`owner/repository` on GitHub).
 - `scripts/build-site.sh` – takes the `.deb`, `.rpm` and `.pkg.tar.zst` from the latest release of each app, verifies the
   signature of `SHA256SUMS` with the key from `keys/` and the checksums of the packages, builds the metadata
-  (`Packages`, `Release`, `repodata`, and for Arch `icenux.db` in `arch/x86_64/`) and signs it (APT and RPM).
+  (`Packages`, `Release`, `repodata`, and for Arch `icenux.db` in `arch/x86_64/`) and signs it (APT, RPM and pacman: every Arch package and `icenux.db` get a `.sig`).
 - `.github/workflows/publish.yml` – runs the build on a change in `main`, every hour and manually,
   and deploys the result to Pages. On an error (invalid signature, missing package) nothing is deployed
   and the existing repository stays unchanged.

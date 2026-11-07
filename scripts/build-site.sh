@@ -3,8 +3,8 @@
 # (Arch) pro GitHub Pages do výstupní složky (výchozí dist/site):
 #   apt/  – plochý repozitář (Packages, Release, InRelease, Release.gpg, pool/<aplikace>/*.deb)
 #   rpm/  – repodata/ z createrepo_c + podepsaný repomd.xml.asc, <aplikace>/*.rpm
-#   arch/x86_64/ – icenux.db (repo-add) a *.pkg.tar.zst; pacman repozitář je bez podpisu (u uživatele
-#                  SigLevel = Optional TrustAll), ověřený je ale zdroj: balíček projde jen přes podepsaný SHA256SUMS
+#   arch/x86_64/ – icenux.db (repo-add), *.pkg.tar.zst a podpisy (*.sig) klíčem Icenux: každý balíček i databáze
+#                  (u uživatele SigLevel = Required po pacman-key --add / --lsign-key klíče Icenux)
 #   icenux.asc – veřejný klíč repozitáře
 #
 # Klíče: metadata repozitáře podepisuje klíč Icenux (keys/icenux.asc, otisk keys/fingerprint;
@@ -138,9 +138,15 @@ createrepo_c --quiet "$site/rpm"
 (
     cd "$site/arch/x86_64"
     if compgen -G "*.pkg.tar.zst" > /dev/null; then
+        # balíčky se podepisují před repo-add (do databáze se pak zapíše i podpis); podpis je binární (*.sig), jak chce pacman
+        for f in ./*.pkg.tar.zst; do "${sign[@]}" --detach-sign --output "$f.sig" "$f"; done
         repo-add --quiet --nocolor icenux.db.tar.gz ./*.pkg.tar.zst
-        for f in icenux.db icenux.files; do cp --remove-destination "$f.tar.gz" "$f"; done
         rm -f ./*.old
+        for f in icenux.db icenux.files; do
+            "${sign[@]}" --detach-sign --output "$f.tar.gz.sig" "$f.tar.gz"
+            cp --remove-destination "$f.tar.gz" "$f"
+            cp --remove-destination "$f.tar.gz.sig" "$f.sig"
+        done
     else
         cd .. && rmdir x86_64 && cd .. && rmdir arch
     fi
