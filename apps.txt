@@ -5,3 +5,4 @@ Icenux/repo-doctor
 Icenux/ccc_TUI ccc
 Icenux/Live-M livem
 Icenux/displays displays
+Icenux/scrv scrv
