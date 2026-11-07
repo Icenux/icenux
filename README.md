@@ -1,6 +1,6 @@
 # Icenux
 
-A shared APT and RPM repository for my applications. It runs on GitHub Pages, no server of its own.
+A shared APT, RPM and pacman (Arch) repository for my applications. It runs on GitHub Pages, no server of its own.
 Apps in it so far: [repo-doctor](https://github.com/Icenux/repo-doctor), [ccc](https://github.com/Icenux/ccc_TUI),
 [Live-M](https://github.com/Icenux/Live-M), [displays](https://github.com/Icenux/displays),
 [scrv](https://github.com/Icenux/scrv), [Sway Desktop Stats](https://github.com/Icenux/sway_desktop_stats) and
@@ -21,6 +21,21 @@ sudo apt update
 
 Then install an app with `sudo apt install <package>` (`repo-doctor`, `ccc`, `livem`, `displays`, `scrv`,
 `sway-desktop-stats`, `sgc-screensaver`).
+
+Arch Linux (pacman repository):
+
+```sh
+sudo tee -a /etc/pacman.conf <<'EOF'
+[icenux]
+SigLevel = Optional TrustAll
+Server = https://icenux.github.io/icenux/arch/$arch
+EOF
+sudo pacman -Sy livem
+```
+
+The pacman repository is **not signed** (`Optional TrustAll` accepts it without a key). A package still gets in only
+through the signed `SHA256SUMS` of its release (see below), and the transport is HTTPS. Arch packages exist for
+repo-doctor, livem, displays, scrv, sway-desktop-stats and sgc-screensaver (not for ccc yet).
 
 ## Verifying the keys
 
@@ -51,9 +66,9 @@ of a release like this: `gpg --import keys/<app>.asc && gpg --verify SHA256SUMS.
 ## How it works
 
 - `apps.txt` – the list of apps (`owner/repository` on GitHub).
-- `scripts/build-site.sh` – takes the `.deb` and `.rpm` from the latest release of each app, verifies the
+- `scripts/build-site.sh` – takes the `.deb`, `.rpm` and `.pkg.tar.zst` from the latest release of each app, verifies the
   signature of `SHA256SUMS` with the key from `keys/` and the checksums of the packages, builds the metadata
-  (`Packages`, `Release`, `repodata`) and signs it.
+  (`Packages`, `Release`, `repodata`, and for Arch `icenux.db` in `arch/x86_64/`) and signs it (APT and RPM).
 - `.github/workflows/publish.yml` – runs the build on a change in `main`, every hour and manually,
   and deploys the result to Pages. On an error (invalid signature, missing package) nothing is deployed
   and the existing repository stays unchanged.
@@ -65,7 +80,7 @@ The repository always holds only the **latest version** of each app.
 
 ## Adding an app
 
-1. The app's release contains `*.deb` and/or `*.rpm`, `SHA256SUMS` and `SHA256SUMS.asc` (signed with the app's key).
+1. The app's release contains `*.deb`, `*.rpm` and/or `*.pkg.tar.zst`, `SHA256SUMS` and `SHA256SUMS.asc` (signed with the app's key).
 2. The app's public key goes to `keys/<app>.asc` and its fingerprint to `keys/<app>.fingerprint`.
 3. Add a line `owner/repository` to `apps.txt` (and after a space the package name, when it differs from the repository name,
    e.g. `Icenux/ccc_TUI ccc`) and commit to `main`. Merge it only after the signed release exists, otherwise the build fails

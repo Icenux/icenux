@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Z nejnovějších vydání aplikací (apps.txt) vyrobí podepsaný APT a RPM repozitář pro
-# GitHub Pages do výstupní složky (výchozí dist/site):
+# Z nejnovějších vydání aplikací (apps.txt) vyrobí podepsaný APT a RPM repozitář a pacman repozitář
+# (Arch) pro GitHub Pages do výstupní složky (výchozí dist/site):
 #   apt/  – plochý repozitář (Packages, Release, InRelease, Release.gpg, pool/<aplikace>/*.deb)
 #   rpm/  – repodata/ z createrepo_c + podepsaný repomd.xml.asc, <aplikace>/*.rpm
+#   arch/x86_64/ – icenux.db (repo-add) a *.pkg.tar.zst; pacman repozitář je bez podpisu (u uživatele
+#                  SigLevel = Optional TrustAll), ověřený je ale zdroj: balíček projde jen přes podepsaný SHA256SUMS
 #   icenux.asc – veřejný klíč repozitáře
 #
 # Klíče: metadata repozitáře podepisuje klíč Icenux (keys/icenux.asc, otisk keys/fingerprint;
@@ -12,7 +14,8 @@
 # musí nést jméno aplikace a verzi odpovídající značce vydání.
 #
 # Volání: GH_TOKEN=<token> GNUPGHOME=<klíčenka s klíčem repozitáře> scripts/build-site.sh [VÝSTUP]
-# Potřebuje gh, gpg, dpkg-deb, rpm, apt-ftparchive (apt-utils) a createrepo_c.
+# Potřebuje gh, gpg, dpkg-deb, rpm, apt-ftparchive (apt-utils), createrepo_c a pro Arch repo-add
+# (balíček pacman-package-manager), bsdtar (libarchive-tools) a zstd.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -25,7 +28,7 @@ trap 'rm -rf "$work"' EXIT
 die() { echo "build-site: $*" >&2; exit 1; }
 
 
-rm -rf "$site" && mkdir -p "$site/apt" "$site/rpm"
+rm -rf "$site" && mkdir -p "$site/apt" "$site/rpm" "$site/arch/x86_64"
 cp keys/icenux.asc "$site/icenux.asc"
 
 apps=(); pkgs=()
@@ -58,17 +61,22 @@ for i in "${!apps[@]}"; do
     grep -q "^\[GNUPG:\] VALIDSIG $appfpr " <<< "$status" \
         || die "$app $tag: SHA256SUMS není podepsaný klíčem $appfpr"
 
-    # 2) podepsaný seznam je seznam povolených souborů: stahují se přesně jeho .deb/.rpm
-    debs=(); rpms=()
+    # 2) podepsaný seznam je seznam povolených souborů: stahují se přesně jeho .deb/.rpm/.pkg.tar.zst
+    debs=(); rpms=(); pkgs_arch=()
     while read -r _ file; do
         file=${file#\*}
-        case "$file" in *.deb|*.rpm) ;; *) continue ;; esac
-        [[ $file =~ ^[A-Za-z0-9][A-Za-z0-9._+~-]*\.(deb|rpm)$ ]] || die "$app $tag: nepovolené jméno souboru '$file'"
+        case "$file" in *.deb|*.rpm|*.pkg.tar.zst) ;; *) continue ;; esac
+        [[ $file =~ ^[A-Za-z0-9][A-Za-z0-9._+~-]*\.(deb|rpm|pkg\.tar\.zst)$ ]] || die "$app $tag: nepovolené jméno souboru '$file'"
         gh release download -R "$app" "$tag" -D "$dir" --pattern "$file"
-        case "$file" in *.deb) debs+=("$dir/$file") ;; *) rpms+=("$dir/$file") ;; esac
+        case "$file" in
+            *.deb) debs+=("$dir/$file") ;;
+            *.rpm) rpms+=("$dir/$file") ;;
+            *) pkgs_arch+=("$dir/$file") ;;
+        esac
     done < "$dir/SHA256SUMS"
-    [ "${#debs[@]}" -gt 0 ] || [ "${#rpms[@]}" -gt 0 ] || die "$app $tag: SHA256SUMS neuvádí .deb ani .rpm"
-    (cd "$dir" && grep -E '\.(deb|rpm)$' SHA256SUMS | sha256sum -c --quiet -) \
+    [ "${#debs[@]}" -gt 0 ] || [ "${#rpms[@]}" -gt 0 ] || [ "${#pkgs_arch[@]}" -gt 0 ] \
+        || die "$app $tag: SHA256SUMS neuvádí .deb, .rpm ani .pkg.tar.zst"
+    (cd "$dir" && grep -E '\.(deb|rpm|pkg\.tar\.zst)$' SHA256SUMS | sha256sum -c --quiet -) \
         || die "$app $tag: kontrolní součet balíčku nesedí"
 
     # 3) podepsaný obsah musí patřit právě této aplikaci a verzi (proti podstrčení starého balíčku)
@@ -81,6 +89,13 @@ for i in "${!apps[@]}"; do
         [ "$(rpm -qp --qf '%{VERSION}' "$f")" = "$ver" ] || die "$f: verze neodpovídá značce $tag"
     done
 
+    for f in "${pkgs_arch[@]}"; do
+        info=$(bsdtar -xOf "$f" .PKGINFO) || die "$f: nejde přečíst .PKGINFO"
+        [ "$(sed -n 's/^pkgname = //p' <<< "$info")" = "$name" ] || die "$f: balíček není '$name'"
+        [ "$(sed -n 's/^pkgver = //p' <<< "$info" | sed 's/-[^-]*$//')" = "$ver" ] || die "$f: verze neodpovídá značce $tag"
+        case "$(sed -n 's/^arch = //p' <<< "$info")" in any|x86_64) ;; *) die "$f: nepodporovaná architektura" ;; esac
+    done
+
     if [ "${#debs[@]}" -gt 0 ]; then
         mkdir -p "$site/apt/pool/$name"
         cp "${debs[@]}" "$site/apt/pool/$name/"
@@ -89,8 +104,11 @@ for i in "${!apps[@]}"; do
         mkdir -p "$site/rpm/$name"
         cp "${rpms[@]}" "$site/rpm/$name/"
     fi
+    if [ "${#pkgs_arch[@]}" -gt 0 ]; then
+        cp "${pkgs_arch[@]}" "$site/arch/x86_64/"
+    fi
     summary+=("$name $tag")
-    echo "build-site: $app $tag ověřeno (${#debs[@]}× deb, ${#rpms[@]}× rpm)"
+    echo "build-site: $app $tag ověřeno (${#debs[@]}× deb, ${#rpms[@]}× rpm, ${#pkgs_arch[@]}× pkg.tar.zst)"
 done
 
 # APT
@@ -116,9 +134,21 @@ createrepo_c --quiet "$site/rpm"
 "${sign[@]}" --armor --detach-sign --output "$site/rpm/repodata/repomd.xml.asc" \
     "$site/rpm/repodata/repomd.xml"
 
+# Arch (pacman): databáze bez podpisu; GitHub Pages nezná symlinky, takže icenux.db a icenux.files jsou kopie
+(
+    cd "$site/arch/x86_64"
+    if compgen -G "*.pkg.tar.zst" > /dev/null; then
+        repo-add --quiet --nocolor icenux.db.tar.gz ./*.pkg.tar.zst
+        for f in icenux.db icenux.files; do cp --remove-destination "$f.tar.gz" "$f"; done
+        rm -f ./*.old
+    else
+        cd .. && rmdir x86_64 && cd .. && rmdir arch
+    fi
+)
+
 {
     echo '<!doctype html><meta charset="utf-8"><title>Icenux – balíčkové repozitáře</title>'
-    echo '<p>APT a RPM repozitář <a href="https://github.com/Icenux/icenux">Icenux</a>. Aplikace:</p><ul>'
+    echo '<p>APT, RPM a pacman repozitář <a href="https://github.com/Icenux/icenux">Icenux</a>. Aplikace:</p><ul>'
     for item in "${summary[@]}"; do echo "<li>${item}</li>"; done
     echo '</ul>'
 } > "$site/index.html"

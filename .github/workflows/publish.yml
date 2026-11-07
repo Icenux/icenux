@@ -1,5 +1,5 @@
 name: Publish
-# Poskládá APT a RPM repozitář z nejnovějších vydání aplikací z apps.txt a nasadí ho na Pages.
+# Poskládá APT, RPM a pacman (Arch) repozitář z nejnovějších vydání aplikací z apps.txt a nasadí ho na Pages.
 # Běží při změně v main, každou hodinu (nové vydání aplikace se tak objeví samo) a ručně.
 on:
   push:
@@ -30,8 +30,8 @@ jobs:
       - name: nástroje
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq apt-utils createrepo-c rpm
-      - name: APT a RPM repozitář
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq apt-utils createrepo-c rpm pacman-package-manager libarchive-tools zstd
+      - name: APT, RPM a pacman repozitář
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
