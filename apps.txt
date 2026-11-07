@@ -7,3 +7,4 @@ Icenux/Live-M livem
 Icenux/displays displays
 Icenux/scrv scrv
 Icenux/sway_desktop_stats sway-desktop-stats
+Icenux/arch_SGC_screensaver sgc-screensaver
