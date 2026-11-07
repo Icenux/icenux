@@ -3,3 +3,4 @@
 # Z nejnovějšího vydání každé se vezmou .deb a .rpm; musí mít podepsaný SHA256SUMS.
 Icenux/repo-doctor
 Icenux/ccc_TUI ccc
+Icenux/Live-M livem
