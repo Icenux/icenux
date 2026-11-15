@@ -7,6 +7,10 @@ on:
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
+  # Sent by the release workflows of the apps, so a new release reaches the repositories at once
+  # instead of waiting for the next scheduled run (GitHub often delays those by hours).
+  repository_dispatch:
+    types: [app-released]
 permissions:
   contents: read
 concurrency:
