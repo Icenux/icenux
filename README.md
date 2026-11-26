@@ -64,6 +64,7 @@ of a release like this: `gpg --import keys/<app>.asc && gpg --verify SHA256SUMS.
 | livem | `A4F1 F280 4AD3 0A96 4BB9  DA30 2330 7E96 9582 AFD9` |
 | displays | `1231 9BE5 B7F6 48ED 8B5D  70E1 2D38 C9DC 9E61 6F6E` |
 | scrv | `E0B8 3C1F 064A 94CC 10B9  36DD AF95 4553 54F6 1D8A` |
+| sound | `2F08 0A14 8EDF D794 5B12  797E 2560 E766 1934 1805` |
 | sway-desktop-stats | `1CD3 AD5A 2F5E E290 642A  095A D0BB FC95 6E26 47C5` |
 | sgc-screensaver | `9A97 F6C8 A2EC 7695 9187  4366 B9C5 9E43 05B9 CA8D` |
 
