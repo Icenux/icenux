@@ -3,7 +3,7 @@
 A shared APT, RPM and pacman (Arch) repository for my applications. It runs on GitHub Pages, no server of its own.
 Apps in it so far: [repo-doctor](https://github.com/Icenux/repo-doctor), [ccc](https://github.com/Icenux/ccc_TUI),
 [Live-M](https://github.com/Icenux/Live-M), [displays](https://github.com/Icenux/displays),
-[scrv](https://github.com/Icenux/scrv), [Sway Desktop Stats](https://github.com/Icenux/sway_desktop_stats) and
+[scrv](https://github.com/Icenux/scrv), [sound](https://github.com/Icenux/sound), [Sway Desktop Stats](https://github.com/Icenux/sway_desktop_stats) and
 [SGC Screensaver](https://github.com/Icenux/arch_SGC_screensaver).
 
 ## How to use it
@@ -19,7 +19,7 @@ echo 'deb [signed-by=/usr/share/keyrings/icenux.asc] https://icenux.github.io/ic
 sudo apt update
 ```
 
-Then install an app with `sudo apt install <package>` (`repo-doctor`, `ccc`, `livem`, `displays`, `scrv`,
+Then install an app with `sudo apt install <package>` (`repo-doctor`, `ccc`, `livem`, `displays`, `scrv`, `sound`,
 `sway-desktop-stats`, `sgc-screensaver`).
 
 Arch Linux (pacman repository, signed):
@@ -39,7 +39,7 @@ sudo pacman -Sy livem
 
 The fingerprint is also in "Verifying the keys" below. Every package and the database are signed with the Icenux key; a
 package still gets in only through the signed `SHA256SUMS` of its release (see below).
-Arch packages exist for repo-doctor, livem, displays, scrv, sway-desktop-stats and sgc-screensaver (not for ccc yet).
+Arch packages exist for repo-doctor, livem, displays, scrv, sound, sway-desktop-stats and sgc-screensaver (not for ccc yet).
 
 ## Verifying the keys
 
