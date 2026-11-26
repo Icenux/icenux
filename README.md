@@ -3,7 +3,7 @@
 A shared APT, RPM and pacman (Arch) repository for my applications. It runs on GitHub Pages, no server of its own.
 Apps in it so far: [repo-doctor](https://github.com/Icenux/repo-doctor), [ccc](https://github.com/Icenux/ccc_TUI),
 [Live-M](https://github.com/Icenux/Live-M), [displays](https://github.com/Icenux/displays),
-[scrv](https://github.com/Icenux/scrv), [Sway Desktop Stats](https://github.com/Icenux/sway_desktop_stats) and
+[scrv](https://github.com/Icenux/scrv), [sound](https://github.com/Icenux/sound), [Sway Desktop Stats](https://github.com/Icenux/sway_desktop_stats) and
 [SGC Screensaver](https://github.com/Icenux/arch_SGC_screensaver).
 
 ## How to use it
@@ -19,7 +19,7 @@ echo 'deb [signed-by=/usr/share/keyrings/icenux.asc] https://icenux.github.io/ic
 sudo apt update
 ```
 
-Then install an app with `sudo apt install <package>` (`repo-doctor`, `ccc`, `livem`, `displays`, `scrv`,
+Then install an app with `sudo apt install <package>` (`repo-doctor`, `ccc`, `livem`, `displays`, `scrv`, `sound`,
 `sway-desktop-stats`, `sgc-screensaver`).
 
 Arch Linux (pacman repository, signed):
@@ -39,7 +39,7 @@ sudo pacman -Sy livem
 
 The fingerprint is also in "Verifying the keys" below. Every package and the database are signed with the Icenux key; a
 package still gets in only through the signed `SHA256SUMS` of its release (see below).
-Arch packages exist for repo-doctor, livem, displays, scrv, sway-desktop-stats and sgc-screensaver (not for ccc yet).
+Arch packages exist for repo-doctor, livem, displays, scrv, sound, sway-desktop-stats and sgc-screensaver (not for ccc yet).
 
 ## Verifying the keys
 
@@ -64,6 +64,7 @@ of a release like this: `gpg --import keys/<app>.asc && gpg --verify SHA256SUMS.
 | livem | `A4F1 F280 4AD3 0A96 4BB9  DA30 2330 7E96 9582 AFD9` |
 | displays | `1231 9BE5 B7F6 48ED 8B5D  70E1 2D38 C9DC 9E61 6F6E` |
 | scrv | `E0B8 3C1F 064A 94CC 10B9  36DD AF95 4553 54F6 1D8A` |
+| sound | `2F08 0A14 8EDF D794 5B12  797E 2560 E766 1934 1805` |
 | sway-desktop-stats | `1CD3 AD5A 2F5E E290 642A  095A D0BB FC95 6E26 47C5` |
 | sgc-screensaver | `9A97 F6C8 A2EC 7695 9187  4366 B9C5 9E43 05B9 CA8D` |
 
